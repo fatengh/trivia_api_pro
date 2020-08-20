@@ -3,7 +3,9 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
-from models import setup_db, Question, Category
+from models import setup_db, db_drop_and_create_all, Question, Category
+from flask_migrate import Migrate
+
 
 QUESTIONS_PER_PAGE = 10
 
@@ -31,6 +33,9 @@ def create_app(test_config=None):
   # create and configure the app
  app = Flask(__name__)
  setup_db(app)
+ migrate = Migrate(app)
+ db_drop_and_create_all()
+
 
 
   # Set up CORS. Allow '*' for origins.
@@ -42,11 +47,9 @@ def create_app(test_config=None):
  def after_request(response):
    #after_request decorator to set Access-Control-Allow
     response.headers.add(
-       'Access-Control-Allow-Headers',
-       'Content-Type, Authorization, true')
+       'Access-Control-Allow-Headers','Content-Type, Authorization, true')
     response.headers.add(
-       'Access-Control-Allow-Methods',
-       'GET, POST, PATCH, DELETE, OPTIONS')
+       'Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
 
     return response
 
@@ -54,13 +57,10 @@ def create_app(test_config=None):
  @app.route('/categories')
  def get_all_categories():
   # endpoint to handle GET requests for all available categories.
-  # get all categories and add to dict
   try:
-    # return statement 
      return jsonify({
          'categories': pick_categories()
      }),200
-    #server error 
   except:
       abort(500)
 
@@ -69,7 +69,6 @@ def create_app(test_config=None):
  @app.route('/questions', methods=['GET'])
  def get_question():
      #endpoint to handle GET requests for questions
-     #first paginate all qustions
     selection = Question.query.order_by(Question.id).all()
     curr_question = pagination_question(request, selection)
  
@@ -81,7 +80,6 @@ def create_app(test_config=None):
          'success': True,
          'questions': curr_question,
          'total_questions': len(selection),
-         # get  categories and add the qustion in it
          'categories': pick_categories()
          
      })
@@ -90,9 +88,7 @@ def create_app(test_config=None):
  def delete_question(question_id):
    #endpoint to DELETE question using a question ID
     try:
-        #question by id
         question = Question.query.get(question_id)
-        # if not found any question 
         if question is None:
           abort(404)
         question.delete()
@@ -107,14 +103,12 @@ def create_app(test_config=None):
          'categories': pick_categories()
     })
     except:
-         # problem deleting question
        abort(422)
 
 
  @app.route('/questions', methods=['POST'])
  def create_question():
         #endpoint to POST a new question 
-        # load request body
       body = request.get_json()
       search = body.get('searchTerm', None)
             
@@ -133,7 +127,6 @@ def create_app(test_config=None):
                   'total_questions': total_questions,
                   })
         else:
-          # load data from body
           new_ques = body.get('question',None)
           new_ans = body.get('answer',None)
           new_difficult = body.get('difficulty',None)
@@ -151,13 +144,11 @@ def create_app(test_config=None):
                 # return statemnt
           return jsonify({
               'success': True,
-              'created': question.id,
               'question_created': question.question,
             
              })
 
       except:
-                # unprocessable 
           abort(422)
 
 
@@ -165,7 +156,6 @@ def create_app(test_config=None):
  def get_questions_by_category(category_id):
        #endpoint to get questions based on category
 
-        # get category by id
     selection = Question.query.filter(Question.category == category_id).order_by(Question.id).all()
     curr_question = pagination_question(request, selection)
     
@@ -188,12 +178,8 @@ def create_app(test_config=None):
 
         body = request.get_json()
         prev = body.get('prev_questions',None)
-        # get the category
         category = body.get('quiz_category',None)
-        # isn't found any of them
-    
-        # "ALL" selected
-        #load all questions
+ 
         if (category['id'] == 0):
              questionList = Question.query.order_by(Question.id).all()
         # any category selected

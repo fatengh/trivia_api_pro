@@ -84,8 +84,7 @@ python test_flaskr.py
           "1": "Art", 
           "2": "Science", 
           "3": "Geography"
-      }, 
-      "success": true
+      }
   }
 ```
 #### GET /questions
