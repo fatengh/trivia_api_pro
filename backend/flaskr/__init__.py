@@ -179,14 +179,9 @@ def create_app(test_config=None):
         body = request.get_json()
         prev = body.get('prev_questions',None)
         category = body.get('quiz_category',None)
- 
-        if (category['id'] == 0):
-             questionList = Question.query.order_by(Question.id).all()
-        # any category selected
-        else:
            
-             questionList = Question.query.filter(Question.category == category['id']).order_by(Question.id).all()
-             question = random.choice(questionList)
+        questionList = Question.query.filter(Question.category == category['id']).order_by(Question.id).all()
+        question = random.choice(questionList)
     
         if prev != []:
            while question.id in prev:
