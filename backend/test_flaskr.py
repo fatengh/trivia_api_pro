@@ -70,7 +70,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'unprocessable')
+        self.assertEqual(data['message'], 'Resource not found')
 
      
     
@@ -104,8 +104,8 @@ class TriviaTestCase(unittest.TestCase):
 
         # Assertions
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'Unprocessable entity')
+        self.assertEqual(data['success'], True)
+        
 
   
 
